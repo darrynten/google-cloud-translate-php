@@ -4,7 +4,6 @@
   "type": "library",
   "require": {
     "php": "^5.5.9 || ^7.0",
-    "guzzlehttp/guzzle": "^6.2.1",
     "google/cloud": "^0.20.2",
     "darrynten/any-cache": "^1.0"
   },
