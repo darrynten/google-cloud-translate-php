@@ -12,6 +12,8 @@ library and is quite similar.
 An unofficial, fully unit tested Google Cloud Translate PHP client with 
 extra sugar.
 
+PHP 7.0+
+
 ## Why not just use the official one?
 
 The official one is great, and we actually use it in this package, it
@@ -24,8 +26,7 @@ it up with some extra bits.
 
 The Google Cloud Translate API costs money. If you're doing anything
 with it at scale, you're going to have to keep an eye on your calls to
-make sure things aren't running away with you. I learnt this the hard
-way. It can get expensive.
+make sure things aren't running away with you. It's not cheap.
 
 That's why we introduced some cost cutting features.
 
@@ -46,12 +47,17 @@ This feature is on by default and can easily be disabled.
 
 #### Cheapskate Mode
 
-While not immediately clear, the Google Cloud Translate API charges per 1000 characters.
+While not immediately clear, the Google Cloud Translate API charges per character. At the time of writing around $20 for 1m characters. (you pay
+for detection and translation at the same rates).
 
-We've added "cheapskate mode" that, if set, automatically truncates the 
-desired text, saving you another credit.
+If you wish to first detect the language and then translate, you will
+pay twice for each character.
 
-This feature is on by default and can easily be disabled.
+We're added cheapskate mode, and what this setting allows is for you to
+limit the amount of text used in language detection.
+
+This feature is on by default and can easily be disabled. By default it
+limits language detection to a tweet worth of characters.
 
 ### Conveniences
 
