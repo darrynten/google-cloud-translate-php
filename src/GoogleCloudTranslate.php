@@ -80,7 +80,7 @@ class GoogleCloudTranslate
         $cacheKey = '__google_cloud_translate__localised_languages_';
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
-            $result = $this->translateClient->localizedLanguages($this->target);
+            $result = $this->translateClient->localizedLanguages($this->config->target);
             $this->cache->put($cacheKey, serialize($result), 9999999);
         }
 
@@ -95,10 +95,10 @@ class GoogleCloudTranslate
     public function detectLangauge(string $sampleText)
     {
         $cacheKey = '__google_cloud_translate__detect_language_' .
-            md5($sampleText) . '_type_' . $this->config->type;
+            md5($sampleText) . '_type_' . $this->config->format;
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
-            $result = $this->translateClient->detectLangauge($sampleText, $this->config->type);
+            $result = $this->translateClient->detectLangauge($sampleText, $this->config->format);
             $this->cache->put($cacheKey, serialize($result), 9999999);
         }
 
@@ -113,10 +113,10 @@ class GoogleCloudTranslate
     public function detectLangaugeBatch(array $sampleTexts)
     {
         $cacheKey = '__google_cloud_translate__detect_language_batch_' .
-            md5(json_encode($sampleTexts)) . '_type_' . $this->config->type;
+            md5(json_encode($sampleTexts)) . '_type_' . $this->config->format;
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
-            $result = $this->translateClient->detectLangaugeBatch($sampleTexts, $this->config->type);
+            $result = $this->translateClient->detectLangaugeBatch($sampleTexts, $this->config->format);
             $this->cache->put($cacheKey, serialize($result), 9999999);
         }
 
@@ -217,25 +217,25 @@ class GoogleCloudTranslate
     }
 
     /**
-     * Sets the document type
+     * Sets the document format
      *
-     * @param string $type Either `html` or `text`
+     * @param string $format Either `html` or `text`
      *
      * @return void
      */
-    public function setType(string $type)
+    public function setFormat(string $format)
     {
-        if (Validation::isValidType($type)) {
-            $this->config->type = $type;
+        if (Validation::isValidFormat($format)) {
+            $this->config->format = $format;
         } else {
-            throw new CustomException('Invalid Type');
+            throw new CustomException('Invalid format');
         }
     }
 
     /**
-     * Sets the document type
+     * Sets the model type
      *
-     * @param string $type Either `html` or `text`
+     * @param string $model
      *
      * @return void
      */

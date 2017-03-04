@@ -23,13 +23,13 @@ class Config
     private $key;
 
     /**
-     * The type of text.
+     * The format of text.
      *
      * Options are `text` and `html`
      *
-     * @var string $type
+     * @var string $format
      */
-    public $type = 'html';
+    public $format = 'html';
 
     /**
      * The encoding
@@ -208,14 +208,14 @@ class Config
             $this->target = 'en';
         }
 
-        if (isset($config['type']) && !empty($config['type'])) {
-            if (Validation::isValidType($config['type'])) {
-                $this->type = $config['type'];
+        if (isset($config['format']) && !empty($config['format'])) {
+            if (Validation::isValidformat($config['format'])) {
+                $this->format = $config['format'];
             } else {
-                throw new CustomException('Invalid type');
+                throw new CustomException('Invalid format');
             }
         } else {
-            $this->type = 'text';
+            $this->format = 'text';
         }
 
         /**

@@ -55,8 +55,8 @@ This feature is on by default and can easily be disabled.
 
 ### Conveniences
 
-There are a few other conveniences like being able to set the type,
-language, encoding etc.
+There are a few other conveniences like being able to set the target and
+source language, type, etc.
 
 One use case would be running a single instance of text through
 multiple language attempts.
@@ -87,12 +87,14 @@ $translate->translate($string);
 $translate->translateBatch([$strings]);
 
 // Set optional things
-$language->setType('html');
+$language->setFormat('html');
 $language->setTargetLanguage('en');
+$language->setSourceLanguage('es');
 
 // Extra features
 $language->setCaching(false);
 $language->setCheapskate(false);
+$language->setCheapskateCount(50);
 
 // Full config options
 $config = [
@@ -131,7 +133,7 @@ to learn how to generate a key.
 
 ## Options
 
-* `setType($type)` - Either `html` (default) or `text`
+* `setFormat($type)` - Either `html` (default) or `text`
 * `setSourceLanguage($language)` - Either ISO (`en`, `es`) or BCP-47 (`en-ZA`, `en-GB`).
 * `setTargetLanguage($language)` - Either ISO (`en`, `es`) or BCP-47 (`en-ZA`, `en-GB`).
 

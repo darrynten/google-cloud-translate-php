@@ -30,7 +30,7 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $config = [
             'projectId' => 'project-id',
             'key' => '123',
-            'type' => 'html',
+            'format' => 'html',
             'cheapskate' => true,
             'cache' => true,
             // 'authCache' => null,
@@ -49,9 +49,9 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $instance->setModel('base');
         $this->assertEquals('base', $instance->config->model);
 
-        $this->assertEquals('html', $instance->config->type);
-        $instance->setType('text');
-        $this->assertEquals('text', $instance->config->type);
+        $this->assertEquals('html', $instance->config->format);
+        $instance->setFormat('text');
+        $this->assertEquals('text', $instance->config->format);
 
         $this->assertEquals('160', $instance->config->cheapskateCount);
         $instance->setCheapskateCount(12);

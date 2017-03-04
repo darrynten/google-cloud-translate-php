@@ -55,7 +55,7 @@ class Validation
      *
      * @return boolean
      */
-    public static function isValidType($type)
+    public static function isValidFormat($type)
     {
         return in_array($type, self::$validTypes);
     }

@@ -94,12 +94,12 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
 
         $config = [
             'projectId' => 'project-id',
-            'type' => 'text',
+            'format' => 'text',
         ];
 
         $instance = new GoogleCloudTranslate($config);
 
-        $instance->setType('xxx');
+        $instance->setFormat('xxx');
     }
 
     public function testSetModelExceptonTarget()

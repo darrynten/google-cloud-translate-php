@@ -9,7 +9,7 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 {
     public function testValidType()
     {
-        $this->assertTrue(Validation::isValidType('html'));
+        $this->assertTrue(Validation::isValidFormat('html'));
     }
 
     public function testValidLanguage()
@@ -20,7 +20,7 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 
     public function testInvalidType()
     {
-        $this->assertFalse(Validation::isValidType('BAR'));
+        $this->assertFalse(Validation::isValidFormat('BAR'));
     }
 
     public function testInvalidLanguage()
