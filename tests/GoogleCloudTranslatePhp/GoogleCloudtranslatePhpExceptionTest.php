@@ -2,18 +2,75 @@
 
 namespace DarrynTen\GoogleCloudTranslatePhp\Tests\GoogleCloudTranslatePhp;
 
+use Mockery as m;
 use Google\Cloud\Exception\BadRequestException;
+use DarrynTen\GoogleCloudTranslatePhp\Config;
 use DarrynTen\GoogleCloudTranslatePhp\CustomException;
 use DarrynTen\GoogleCloudTranslatePhp\GoogleCloudTranslate;
 use PHPUnit_Framework_TestCase;
 
 class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
 {
+    public function tearDown()
+    {
+        m::close();
+    }
+
+    public function getMockClient()
+    {
+        $config = [
+            'projectId' => 'project-id',
+        ];
+
+        $config = new Config($config);
+
+        $mock = m::mock(TranslateClient::class);
+
+        $mock->shouldReceive('__construct')
+          ->with($config)
+          ->zeroOrMoreTimes()
+          ->andReturn();
+
+        $mock->shouldReceive('languages')
+          ->zeroOrMoreTimes()
+          ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/languages_response.json')));
+
+        $mock->shouldReceive('localizedLanguages')
+          ->zeroOrMoreTimes()
+          ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/source_languages_for_en.json'), true));
+
+        $mock->shouldReceive('localizedLanguages')
+          ->zeroOrMoreTimes()
+          ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/source_languages_for_en.json'), true));
+
+        return $mock;
+    }
+
+    public function testNonTestConstructWithBadKey()
+    {
+        $this->expectException(BadRequestException::class);
+
+        $config = [
+            'key' => 'xxx',
+            'projectId' => 'project-id',
+        ];
+
+        // Does a live request with a bad API key
+        $instance = new GoogleCloudTranslate($config);
+        $this->assertInstanceOf(GoogleCloudTranslate::class, $instance);
+    }
+
+
     public function testApiException()
     {
+        $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
+        ];
+
         $this->expectException(CustomException::class);
 
-        new GoogleCloudTranslate([], 'xxx');
+        new GoogleCloudTranslate($config, 'xxx');
     }
 
     public function testApiJsonException()
@@ -36,9 +93,9 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
 
     public function testApiKeyException()
     {
-        $this->expectException(BadRequestException::class);
-
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'key' => '123',
             'format' => 'text',
@@ -62,6 +119,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'cheapskate' => true,
             'cheapskateCount' => 10,
@@ -77,6 +136,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
         ];
 
@@ -90,6 +151,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
         ];
 
@@ -104,6 +167,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
         ];
 
@@ -118,6 +183,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
         ];
 
@@ -132,6 +199,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
         ];
 
@@ -145,6 +214,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
         ];
 
@@ -158,6 +229,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'format' => 'text',
         ];
@@ -172,6 +245,8 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $this->expectException(CustomException::class);
 
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
         ];
 

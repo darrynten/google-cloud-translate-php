@@ -73,9 +73,16 @@ class GoogleCloudTranslate
     {
         $this->config = new Config($config);
         $this->cache = new AnyCache();
-        $this->translateClient = new TranslateClient(
-            $this->config->getCloudTranslateConfig()
-        );
+
+        if (!isset($config['is_test_runner'])) {
+            $this->translateClient = new TranslateClient(
+                $this->config->getCloudTranslateConfig()
+            );
+        } else {
+            $this->translateClient = $config['mock_client'];
+        }
+
+        // var_dump($this->translateClient->languages());
 
         // Get and store a list of possible translate languages
         $this->getPossibleTargetLanguages();

@@ -208,8 +208,8 @@ class Config
             $this->target = 'en';
         }
 
-        if (isset($config['format']) && !empty($config['format'])) {
-            if (Validation::isValidFormat($config['format'])) {
+        if (isset($config['format'])) {
+            if (Validation::isValidFormat((string) $config['format'])) {
                 $this->format = $config['format'];
             } else {
                 throw new CustomException('Invalid format');
@@ -218,7 +218,7 @@ class Config
             $this->format = 'text';
         }
 
-        if (isset($config['model']) && !empty($config['model'])) {
+        if (isset($config['model'])) {
             if (Validation::isValidModel($config['model'])) {
                 $this->model = $config['model'];
             } else {
@@ -277,6 +277,10 @@ class Config
 
         if ($this->key) {
             $config['key'] = $this->key;
+        }
+
+        if ($this->target) {
+            $config['target'] = $this->target;
         }
 
         /**

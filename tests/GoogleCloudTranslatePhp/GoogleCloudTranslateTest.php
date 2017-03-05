@@ -6,6 +6,7 @@ use PHPUnit_Framework_TestCase;
 use Mockery as m;
 use ReflectionClass;
 
+use DarrynTen\GoogleCloudTranslatePhp\Config;
 use DarrynTen\GoogleCloudTranslatePhp\GoogleCloudTranslate;
 
 class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
@@ -15,10 +16,42 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         m::close();
     }
 
+    public function getMockClient()
+    {
+        $config = [
+            'projectId' => 'project-id',
+        ];
+
+        $config = new Config($config);
+
+        $mock = m::mock(TranslateClient::class);
+
+        $mock->shouldReceive('__construct')
+          ->with($config)
+          ->zeroOrMoreTimes()
+          ->andReturn();
+
+        $mock->shouldReceive('languages')
+          ->zeroOrMoreTimes()
+          ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/languages_response.json')));
+
+        $mock->shouldReceive('localizedLanguages')
+          ->zeroOrMoreTimes()
+          ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/source_languages_for_en.json'), true));
+
+        $mock->shouldReceive('localizedLanguages')
+          ->zeroOrMoreTimes()
+          ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/source_languages_for_en.json'), true));
+
+        return $mock;
+    }
+
     public function testConstruct()
     {
         $config = [
-            'projectId' => 'project-id'
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
+            'projectId' => 'project-id',
         ];
 
         $instance = new GoogleCloudTranslate($config);
@@ -28,7 +61,10 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
     public function testSet()
     {
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
+            'key' => 'xxx',
             'format' => 'text',
             'model' => 'base',
             'cheapskate' => true,
@@ -37,13 +73,21 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
             // 'authCacheOptions' => ['options'],
             // 'authHttpHandler' => null,
             // 'httpHandler' => null,
-            // 'keyFile' => '{key:1}',
-            // 'keyFilePath' => '.',
+            'keyFile' => '{key:1}',
+            'keyFilePath' => '.',
             'retries' => 3,
             'scopes' => ['scope'],
         ];
 
         $instance = new GoogleCloudTranslate($config);
+
+        $config = $instance->config->getCloudTranslateConfig();
+        $this->assertArrayHasKey('projectId', $config);
+        $this->assertArrayHasKey('key', $config);
+        $this->assertArrayHasKey('target', $config);
+        $this->assertArrayHasKey('keyFile', $config);
+        $this->assertArrayHasKey('keyFilePath', $config);
+        $this->assertArrayHasKey('scopes', $config);
 
         $this->assertEquals('base', $instance->config->model);
         $instance->setModel('');
@@ -84,6 +128,8 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
     public function testLanguages()
     {
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'cheapskate' => true,
             'cache' => false,
@@ -109,6 +155,8 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
     public function testLocalizedLanguages()
     {
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'cheapskate' => true,
             'cache' => false,
@@ -135,6 +183,8 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
     public function testDetect()
     {
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'cheapskate' => true,
             'cache' => false,
@@ -161,6 +211,8 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
     public function testDetectBatch()
     {
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'cheapskate' => true,
             'cache' => true,
@@ -187,6 +239,8 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
     public function testTranslate()
     {
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'cheapskate' => true,
             'target' => 'de',
@@ -216,6 +270,8 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
     public function testTranslateBatch()
     {
         $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
             'projectId' => 'project-id',
             'cheapskate' => true,
             'source' => 'de',
