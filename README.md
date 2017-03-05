@@ -68,6 +68,9 @@ per character, so we ensure that we grab a copy of all supported languages
 and translation targets to make sure that you don't attempt to translate
 across unsupported languages, saving you money.
 
+We also check to ensure you are not trying to translate the same target
+and source, which would also be expensive.
+
 ### Conveniences
 
 There are a few other conveniences like being able to set the target and
@@ -102,7 +105,8 @@ $translate->translate($string);
 $translate->translateBatch([$strings]);
 
 // Set optional things
-$language->setFormat('html');
+$language->setType('html');
+$language->setModel('base');
 $language->setTargetLanguage('en');
 $language->setSourceLanguage('es');
 
@@ -117,7 +121,8 @@ $config = [
   'key' => 'api-key',                      // optional see note below
   'target' => 'en',                        // optional default is en
   'source' => 'en',                        // optional default is en
-  'model' => 'blank',                      // optional default is en
+  'model' => 'base',                       // optional
+  'type' => 'text',                        // optional
   'authCache' => \CacheItemPoolInterface,  // stores access tokens
   'authCacheOptions' => $array,            // cache config
   'authHttpHandler' => callable(),         // psr-7 auth handler
@@ -149,7 +154,8 @@ to learn how to generate a key.
 
 ## Options
 
-* `setFormat($type)` - Either `html` (default) or `text`
+* `setType($type)` - Either `html` (default) or `text`
+* `setModel($model)`
 * `setSourceLanguage($language)` - Either ISO (`en`, `es`) or BCP-47 (`en-ZA`, `en-GB`).
 * `setTargetLanguage($language)` - Either ISO or BCP-47.
 
@@ -166,6 +172,8 @@ Usage of Google\Cloud\Storage\StorageObject is presently not possible.
 * Custom `httpHandler` and `authHttpHandler`
 
 ## Roadmap
+
+* Implement missing features
 
 ## Acknowledgements
 
