@@ -2,6 +2,7 @@
 
 namespace DarrynTen\GoogleCloudTranslatePhp\Tests\GoogleCloudTranslatePhp;
 
+use Google\Cloud\Exception\BadRequestException;
 use DarrynTen\GoogleCloudTranslatePhp\CustomException;
 use DarrynTen\GoogleCloudTranslatePhp\GoogleCloudTranslate;
 use PHPUnit_Framework_TestCase;
@@ -33,6 +34,29 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    public function testApiKeyException()
+    {
+        $this->expectException(BadRequestException::class);
+
+        $config = [
+            'projectId' => 'project-id',
+            'key' => '123',
+            'format' => 'text',
+            'cheapskate' => true,
+            'cache' => true,
+            // 'authCache' => null,
+            // 'authCacheOptions' => ['options'],
+            // 'authHttpHandler' => null,
+            // 'httpHandler' => null,
+            'keyFile' => '{key:1}',
+            'keyFilePath' => '.',
+            'retries' => 3,
+            'scopes' => ['scope'],
+        ];
+
+        $instance = new GoogleCloudTranslate($config);
+    }
+
     public function testCheapskateException()
     {
         $this->expectException(CustomException::class);
@@ -61,6 +85,48 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
         $instance->translate('true');
     }
 
+    public function testSetBadPossibleSourceForTarge()
+    {
+        $this->expectException(CustomException::class);
+
+        $config = [
+            'projectId' => 'project-id',
+        ];
+
+        $instance = new GoogleCloudTranslate($config);
+
+        $instance->isValidPossibleSourceForTarget('xxx');
+    }
+
+
+    public function testSetBadPossibleTarget()
+    {
+        $this->expectException(CustomException::class);
+
+        $config = [
+            'projectId' => 'project-id',
+        ];
+
+        $instance = new GoogleCloudTranslate($config);
+
+        $instance->isValidPossibleTarget('xxx');
+    }
+
+
+    public function testSetBadLanguageExcepton()
+    {
+        $this->expectException(CustomException::class);
+
+        $config = [
+            'projectId' => 'project-id',
+        ];
+
+        $instance = new GoogleCloudTranslate($config);
+
+        $instance->getPossibleSourceLanguagesForTarget('xxx');
+    }
+
+
     public function testSetLanguageExcepton()
     {
         $this->expectException(CustomException::class);
@@ -80,7 +146,6 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
 
         $config = [
             'projectId' => 'project-id',
-            'model' => 'blank',
         ];
 
         $instance = new GoogleCloudTranslate($config);
@@ -108,7 +173,6 @@ class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
 
         $config = [
             'projectId' => 'project-id',
-            'model' => 'blank',
         ];
 
         $instance = new GoogleCloudTranslate($config);

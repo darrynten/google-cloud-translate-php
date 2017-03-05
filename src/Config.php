@@ -20,7 +20,7 @@ class Config
      *
      * @var string $key
      */
-    private $key;
+    private $key = null;
 
     /**
      * The format of text.
@@ -209,13 +209,23 @@ class Config
         }
 
         if (isset($config['format']) && !empty($config['format'])) {
-            if (Validation::isValidformat($config['format'])) {
+            if (Validation::isValidFormat($config['format'])) {
                 $this->format = $config['format'];
             } else {
                 throw new CustomException('Invalid format');
             }
         } else {
             $this->format = 'text';
+        }
+
+        if (isset($config['model']) && !empty($config['model'])) {
+            if (Validation::isValidModel($config['model'])) {
+                $this->model = $config['model'];
+            } else {
+                throw new CustomException('Invalid model');
+            }
+        } else {
+            $this->model = '';
         }
 
         /**
@@ -262,9 +272,12 @@ class Config
     public function getCloudTranslateConfig()
     {
         $config = [
-            'key' => $this->key,
             'projectId' => $this->projectId,
         ];
+
+        if ($this->key) {
+            $config['key'] = $this->key;
+        }
 
         /**
          * TODO

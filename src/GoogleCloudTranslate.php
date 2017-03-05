@@ -38,6 +38,31 @@ class GoogleCloudTranslate
     private $cache;
 
     /**
+     * List of possible translation target languages
+     *
+     * Used to pre-check that a language is supported as a target
+     * or a source, so as to ensure no unneeded translation attempts
+     * are made, which are charged per character.
+     *
+     * @var array $possibleTargetLanguages
+     */
+    private $possibleTargetLanguages = [];
+
+    /**
+     * List of possible source languages for targets.
+     *
+     * Used to pre-check that a language is supported as a target
+     * or a source, so as to ensure no unneeded translation attempts
+     * are made, which are charged per character.
+     *
+     * Stored with the language code as the key and the valid
+     * sources as an array on that key.
+     *
+     * @var array $possibleSourceLanguages
+     */
+    private $possibleSourceLanguages = [];
+
+    /**
      * Construct
      *
      * Bootstraps the config and the cache, then loads the client
@@ -51,18 +76,107 @@ class GoogleCloudTranslate
         $this->translateClient = new TranslateClient(
             $this->config->getCloudTranslateConfig()
         );
+
+        // Get and store a list of possible translate languages
+        $this->getPossibleTargetLanguages();
+        $this->getPossibleSourceLanguagesForTarget($this->config->target);
+    }
+
+    /**
+     * Get and store a list of possible languages that translation
+     * can be performed against
+     *
+     * @return void
+     */
+    public function getPossibleTargetLanguages()
+    {
+        $possibleLanguages = $this->languages();
+
+        foreach ($possibleLanguages as $language) {
+            $this->possibleTargetLanguages[] = $language;
+        }
+    }
+
+    /**
+     * Get and store a list of possible languages that translation
+     * can be performed against for a specified target
+     *
+     * @return void
+     */
+    public function getPossibleSourceLanguagesForTarget($target)
+    {
+        if (!Validation::isValidLanguageRegex($target)) {
+            throw new CustomException(sprintf(
+                'Invalid target language %s',
+                $target
+            ));
+        }
+
+        $possibleSourceLanguages = $this->localizedLanguages($target);
+
+        foreach ($possibleSourceLanguages as $language) {
+            $this->possibleSourceLanguages[$target][$language['code']] = $language['name'];
+        }
+    }
+
+    /**
+     * Check if a desired language is a valid target
+     *
+     * @param string $target
+     *
+     * @return boolean
+     *
+     * @throws CustomException
+     */
+    public function isValidPossibleTarget($target)
+    {
+        if (!in_array($target, $this->possibleTargetLanguages)) {
+            throw new CustomException(sprintf(
+                'Invalid target language %s',
+                $target
+            ));
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if a particular language is valid as a source for a
+     * given target
+     *
+     * @param string $target
+     *
+     * @return boolean
+     *
+     * @throws CustomException
+     */
+    public function isValidPossibleSourceForTarget($source)
+    {
+        if (!isset($this->possibleSourceLanguages[$this->config->target])) {
+            $this->getPossibleSourceLanguagesForTarget($this->config->target);
+        }
+
+        if (!array_key_exists($source, $this->possibleSourceLanguages[$this->config->target])) {
+            throw new CustomException(sprintf(
+                'Invalid source language %s for target %s',
+                $source,
+                $this->config->target
+            ));
+        }
+
+        return true;
     }
 
     /**
      * Get a list of supported languages
      *
-     * @return mixed
+     * @return array
      */
     public function languages()
     {
         $cacheKey = '__google_cloud_translate__languages_';
 
-        if (!$result = unserialize($this->cache->get($cacheKey))) {
+        if (!$this->config->cache || !$result = unserialize($this->cache->get($cacheKey))) {
             $result = $this->translateClient->languages();
             $this->cache->put($cacheKey, serialize($result), 9999999);
         }
@@ -73,14 +187,16 @@ class GoogleCloudTranslate
     /**
      * Get a list of supported targets for a language
      *
-     * @return mixed
+     * @return array
      */
-    public function localizedLanguages()
+    public function localizedLanguages($target)
     {
-        $cacheKey = '__google_cloud_translate__localised_languages_';
+        $cacheKey = '__google_cloud_translate__localised_languages_' . $target;
 
-        if (!$result = unserialize($this->cache->get($cacheKey))) {
-            $result = $this->translateClient->localizedLanguages($this->config->target);
+        if (!$this->config->cache || !$result = unserialize($this->cache->get($cacheKey))) {
+            $result = $this->translateClient->localizedLanguages([
+                'target' => $target
+            ]);
             $this->cache->put($cacheKey, serialize($result), 9999999);
         }
 
@@ -92,13 +208,15 @@ class GoogleCloudTranslate
      *
      * @return mixed
      */
-    public function detectLangauge(string $sampleText)
+    public function detectLanguage(string $sample)
     {
         $cacheKey = '__google_cloud_translate__detect_language_' .
-            md5($sampleText) . '_type_' . $this->config->format;
+            md5($sample) . '_type_' . $this->config->format;
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
-            $result = $this->translateClient->detectLangauge($sampleText, $this->config->format);
+            $result = $this->translateClient->detectLanguage($sample, [
+                'format' => $this->config->format
+            ]);
             $this->cache->put($cacheKey, serialize($result), 9999999);
         }
 
@@ -110,15 +228,18 @@ class GoogleCloudTranslate
      *
      * @return mixed
      */
-    public function detectLangaugeBatch(array $sampleTexts)
+    public function detectLanguageBatch(array $sampleTexts)
     {
         $cacheKey = '__google_cloud_translate__detect_language_batch_' .
             md5(json_encode($sampleTexts)) . '_type_' . $this->config->format;
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
-            $result = $this->translateClient->detectLangaugeBatch($sampleTexts, $this->config->format);
+            $result = $this->translateClient->detectLanguageBatch($sampleTexts, [
+                'format' => $this->config->format
+            ]);
             $this->cache->put($cacheKey, serialize($result), 9999999);
         }
+
 
         return $result;
     }
@@ -143,7 +264,7 @@ class GoogleCloudTranslate
           'source' => $this->config->source,
           'target' => $this->config->target,
           'format' => $this->config->format,
-          'model' => $this->config->model,
+          'model' => (string) $this->config->model,
         ];
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
@@ -173,7 +294,8 @@ class GoogleCloudTranslate
           'source' => $this->config->source,
           'target' => $this->config->target,
           'format' => $this->config->format,
-          'model' => $this->config->model,
+          // Default model is null for batch, '' for single
+          'model' => ($this->config->model !== '') ? $this->config->model : null,
         ];
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {

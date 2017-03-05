@@ -29,7 +29,6 @@ class Validation
      * @var array $validModels
      */
     private static $validModels =[
-        '',
         'nmt',
         'base',
     ];
@@ -55,7 +54,7 @@ class Validation
      *
      * @return boolean
      */
-    public static function isValidFormat($type)
+    public static function isValidFormat(string $type)
     {
         return in_array($type, self::$validTypes);
     }
@@ -67,8 +66,12 @@ class Validation
      *
      * @return boolean
      */
-    public static function isValidModel($model)
+    public static function isValidModel(string $model)
     {
+        if ($model === null || $model === '') {
+            return true;
+        }
+
         return in_array($model, self::$validModels);
     }
 
@@ -84,18 +87,16 @@ class Validation
      *
      * @return boolean
      */
-    public static function isValidLanguageRegex($language)
+    public static function isValidLanguageRegex(string $language)
     {
-        $match = false;
-
         if (preg_match(self::$validISOLanguageRegex, $language)) {
-            $match = true;
+            return true;
         }
 
         if (preg_match(self::$validBCP47LanguageRegex, $language)) {
-            $match = true;
+            return true;
         }
 
-        return $match;
+        return false;
     }
 }

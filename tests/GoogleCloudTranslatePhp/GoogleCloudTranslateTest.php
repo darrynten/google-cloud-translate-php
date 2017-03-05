@@ -29,29 +29,31 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
     {
         $config = [
             'projectId' => 'project-id',
-            'key' => '123',
-            'format' => 'html',
+            'format' => 'text',
+            'model' => 'base',
             'cheapskate' => true,
             'cache' => true,
             // 'authCache' => null,
             // 'authCacheOptions' => ['options'],
             // 'authHttpHandler' => null,
             // 'httpHandler' => null,
-            'keyFile' => '{key:1}',
-            'keyFilePath' => '.',
+            // 'keyFile' => '{key:1}',
+            // 'keyFilePath' => '.',
             'retries' => 3,
             'scopes' => ['scope'],
         ];
 
         $instance = new GoogleCloudTranslate($config);
 
+        $this->assertEquals('base', $instance->config->model);
+        $instance->setModel('');
         $this->assertEquals('', $instance->config->model);
         $instance->setModel('base');
         $this->assertEquals('base', $instance->config->model);
 
-        $this->assertEquals('html', $instance->config->format);
-        $instance->setFormat('text');
         $this->assertEquals('text', $instance->config->format);
+        $instance->setFormat('html');
+        $this->assertEquals('html', $instance->config->format);
 
         $this->assertEquals('160', $instance->config->cheapskateCount);
         $instance->setCheapskateCount(12);
@@ -74,6 +76,9 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $instance->setCache(false);
         $this->assertEquals(false, $instance->config->cache);
         $instance->setCache(true);
+
+        $this->assertEquals(true, $instance->isValidPossibleTarget('es'));
+        $this->assertEquals(true, $instance->isValidPossibleSourceForTarget('en'));
     }
 
     public function testLanguages()
@@ -81,14 +86,14 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $config = [
             'projectId' => 'project-id',
             'cheapskate' => true,
-            'cache' => true,
+            'cache' => false,
         ];
 
         $client = m::mock(TranslateClient::class);
 
         $client->shouldReceive('languages')
             ->once()
-            ->andReturn();
+            ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/languages_response.json')));
 
         $instance = new GoogleCloudTranslate($config);
 
@@ -106,14 +111,15 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $config = [
             'projectId' => 'project-id',
             'cheapskate' => true,
-            'cache' => true,
+            'cache' => false,
         ];
 
         $client = m::mock(TranslateClient::class);
 
         $client->shouldReceive('localizedLanguages')
+            ->with(['target' => 'en'])
             ->once()
-            ->andReturn();
+            ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/source_languages_for_en.json')));
 
         $instance = new GoogleCloudTranslate($config);
 
@@ -123,7 +129,7 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $reflectedClient->setAccessible(true);
         $reflectedClient->setValue($instance, $client);
 
-        $languages = $instance->localizedLanguages();
+        $languages = $instance->localizedLanguages('en');
     }
 
     public function testDetect()
@@ -131,14 +137,15 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $config = [
             'projectId' => 'project-id',
             'cheapskate' => true,
-            'cache' => true,
+            'cache' => false,
         ];
 
         $client = m::mock(TranslateClient::class);
 
-        $client->shouldReceive('detectLangauge')
+        $client->shouldReceive('detectLanguage')
+            ->with(file_get_contents(__DIR__ . '/mocks/test_detect_sample.txt'), [ 'format' => 'text'])
             ->once()
-            ->andReturn();
+            ->andReturn(file_get_contents(__DIR__ . '/mocks/detect_language_response_en.json'));
 
         $instance = new GoogleCloudTranslate($config);
 
@@ -148,7 +155,7 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $reflectedClient->setAccessible(true);
         $reflectedClient->setValue($instance, $client);
 
-        $result = $instance->detectLangauge('see spot. see spot run. good spot.');
+        $result = $instance->detectLanguage(file_get_contents(__DIR__ . '/mocks/test_detect_sample.txt'));
     }
 
     public function testDetectBatch()
@@ -161,9 +168,10 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
 
         $client = m::mock(TranslateClient::class);
 
-        $client->shouldReceive('detectLangaugeBatch')
+        $client->shouldReceive('detectLanguageBatch')
+            ->with(json_decode(file_get_contents(__DIR__ . '/mocks/batch_language_request.json')), [ 'format' => 'text'])
             ->once()
-            ->andReturn();
+            ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/batch_language_response.json')));
 
         $instance = new GoogleCloudTranslate($config);
 
@@ -173,10 +181,7 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $reflectedClient->setAccessible(true);
         $reflectedClient->setValue($instance, $client);
 
-        $result = $instance->detectLangaugeBatch([
-            'This is the first one',
-            'Ich liebe dich'
-        ]);
+        $result = $instance->detectLanguageBatch(json_decode(file_get_contents(__DIR__ . '/mocks/batch_language_request.json')));
     }
 
     public function testTranslate()
@@ -184,8 +189,8 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $config = [
             'projectId' => 'project-id',
             'cheapskate' => true,
-            'target' => 'es',
-            'source' => 'de',
+            'target' => 'de',
+            'source' => 'en',
             'cache' => true,
             'cheapskate' => false,
         ];
@@ -193,8 +198,9 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $client = m::mock(TranslateClient::class);
 
         $client->shouldReceive('translate')
+            ->with('A super awesome thing to translate.', ['source' => 'en', 'target' => 'de', 'format' => 'text', 'model' => ''])
             ->once()
-            ->andReturn();
+            ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/test_translate_result_en_to_de.json')));
 
         $instance = new GoogleCloudTranslate($config);
 
@@ -219,8 +225,9 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $client = m::mock(TranslateClient::class);
 
         $client->shouldReceive('translateBatch')
+            ->with(json_decode(file_get_contents(__DIR__ . '/mocks/test_batch_translate_request.json')), ['source' => 'de', 'target' => 'en', 'format' => 'text', 'model' => null])
             ->once()
-            ->andReturn();
+            ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/test_batch_translate_response.json')));
 
         $instance = new GoogleCloudTranslate($config);
 
@@ -230,9 +237,6 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $reflectedClient->setAccessible(true);
         $reflectedClient->setValue($instance, $client);
 
-        $result = $instance->translateBatch([
-            'Multiple translations',
-            'Konnen sie vielen haben?'
-        ]);
+        $result = $instance->translateBatch(json_decode(file_get_contents(__DIR__ . '/mocks/test_batch_translate_request.json')));
     }
 }
