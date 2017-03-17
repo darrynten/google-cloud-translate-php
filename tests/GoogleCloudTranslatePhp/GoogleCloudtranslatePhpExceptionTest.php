@@ -9,7 +9,7 @@ use DarrynTen\GoogleCloudTranslatePhp\CustomException;
 use DarrynTen\GoogleCloudTranslatePhp\GoogleCloudTranslate;
 use PHPUnit_Framework_TestCase;
 
-class GoogleCloudTranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
+class GoogleCloudtranslatePhpExceptionTest extends PHPUnit_Framework_TestCase
 {
     public function tearDown()
     {
