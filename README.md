@@ -1,7 +1,7 @@
 ## google-cloud-translate-php
 
 ![Travis Build Status](https://travis-ci.org/darrynten/google-cloud-translate-php.svg?branch=master)
-![StyleCI Status](https://styleci.io/repos/81687310/shield?branch=master)
+![StyleCI Status](https://styleci.io/repos/83930517/shield?branch=master)
 [![codecov](https://codecov.io/gh/darrynten/google-cloud-translate-php/branch/master/graph/badge.svg)](https://codecov.io/gh/darrynten/google-cloud-translate-php)
 ![Packagist Version](https://img.shields.io/packagist/v/darrynten/google-cloud-translate-php.svg)
 ![MIT License](https://img.shields.io/github/license/darrynten/google-cloud-translate-php.svg)
