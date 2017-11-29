@@ -215,7 +215,7 @@ class GoogleCloudTranslate
      *
      * @return mixed
      */
-    public function detectLanguage(string $sample)
+    public function detectLanguage($sample)
     {
         $cacheKey = '__google_cloud_translate__detect_language_' .
             md5($sample) . '_type_' . $this->config->format;
@@ -256,7 +256,7 @@ class GoogleCloudTranslate
      *
      * @return mixed
      */
-    public function translate(string $text)
+    public function translate($text)
     {
         $this->checkCheapskate($text);
 
@@ -264,15 +264,15 @@ class GoogleCloudTranslate
             throw new CustomException('Cannot translate to and from the same language.');
         }
 
-        $cacheKey = '__google_cloud_translate__translate_' .
-            md5($text) . '_';
-
         $options = [
           'source' => $this->config->source,
           'target' => $this->config->target,
           'format' => $this->config->format,
           'model' => (string) $this->config->model,
         ];
+
+        $cacheKey = '__google_cloud_translate__translate_' .
+            md5(serialize([$text, $options])) . '_';
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
             $result = $this->translateClient->translate($text, $options);
@@ -294,9 +294,6 @@ class GoogleCloudTranslate
             $this->checkCheapskate($text);
         }
 
-        $cacheKey = '__google_cloud_translate__translate_batch_' .
-            md5(json_encode($texts)) . '_';
-
         $options = [
           'source' => $this->config->source,
           'target' => $this->config->target,
@@ -304,6 +301,9 @@ class GoogleCloudTranslate
           // Default model is null for batch, '' for single
           'model' => ($this->config->model !== '') ? $this->config->model : null,
         ];
+
+        $cacheKey = '__google_cloud_translate__translate_batch_' .
+            md5(serialize([$texts, $options])) . '_';
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
             $result = $this->translateClient->translateBatch($texts, $options);
@@ -329,7 +329,7 @@ class GoogleCloudTranslate
      * @throws CustomException
      * @return void
      */
-    private function checkCheapskate(string $text)
+    private function checkCheapskate($text)
     {
         if ($this->config->cheapskate === false) {
             return;
@@ -352,7 +352,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setFormat(string $format)
+    public function setFormat($format)
     {
         if (Validation::isValidFormat($format)) {
             $this->config->format = $format;
@@ -368,7 +368,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setModel(string $model)
+    public function setModel($model)
     {
         if (Validation::isValidModel($model)) {
             $this->config->model = $model;
@@ -384,7 +384,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setSourceLanguage(string $sourceLanguage)
+    public function setSourceLanguage($sourceLanguage)
     {
         if (Validation::isValidLanguageRegex($sourceLanguage)) {
             $this->config->source = $sourceLanguage;
@@ -401,7 +401,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setTargetLanguage(string $targetLanguage)
+    public function setTargetLanguage($targetLanguage)
     {
         if (Validation::isValidLanguageRegex($targetLanguage)) {
             $this->config->target = $targetLanguage;
@@ -417,7 +417,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setCheapskate(bool $value)
+    public function setCheapskate($value)
     {
         $this->config->cheapskate = $value;
     }
@@ -429,7 +429,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setCheapskateCount(int $value)
+    public function setCheapskateCount($value)
     {
         $this->config->cheapskateCount = $value;
     }

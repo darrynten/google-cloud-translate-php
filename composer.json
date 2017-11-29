@@ -3,7 +3,7 @@
   "description": "PHP Google Cloud Translate Client with Extras",
   "type": "library",
   "require": {
-    "php": "^7.0",
+    "php": "^5.6|^7.0",
     "google/cloud": "^0.20.2",
     "darrynten/any-cache": "^1.0"
   },

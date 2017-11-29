@@ -54,7 +54,7 @@ class Validation
      *
      * @return boolean
      */
-    public static function isValidFormat(string $type)
+    public static function isValidFormat($type)
     {
         return in_array($type, self::$validTypes);
     }
@@ -66,7 +66,7 @@ class Validation
      *
      * @return boolean
      */
-    public static function isValidModel(string $model)
+    public static function isValidModel($model)
     {
         if ($model === null || $model === '') {
             return true;
@@ -87,7 +87,7 @@ class Validation
      *
      * @return boolean
      */
-    public static function isValidLanguageRegex(string $language)
+    public static function isValidLanguageRegex($language)
     {
         if (preg_match(self::$validISOLanguageRegex, $language)) {
             return true;
