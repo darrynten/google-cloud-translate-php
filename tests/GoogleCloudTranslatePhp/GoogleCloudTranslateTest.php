@@ -2,6 +2,7 @@
 
 namespace DarrynTen\GoogleCloudTranslatePhp\Tests\GoogleCloudTranslatePhp;
 
+use Google\Cloud\Translate\TranslateClient;
 use PHPUnit_Framework_TestCase;
 use Mockery as m;
 use ReflectionClass;
@@ -294,5 +295,54 @@ class GoogleCloudTranslateTest extends PHPUnit_Framework_TestCase
         $reflectedClient->setValue($instance, $client);
 
         $result = $instance->translateBatch(json_decode(file_get_contents(__DIR__ . '/mocks/test_batch_translate_request.json')));
+    }
+
+    public function testTranslationCache()
+    {
+        $config = [
+            'is_test_runner' => true,
+            'mock_client' => $this->getMockClient(),
+            'projectId' => 'project-id',
+            'cheapskate' => true,
+            'target' => 'de',
+            'source' => 'en',
+            'cache' => true,
+            'cheapskate' => false,
+        ];
+
+        $clientMock = m::mock(TranslateClient::class);
+
+        $sourceTextEn = 'A super awesome thing to translate.';
+        $sourceTextDe = 'Ein super genial Sache zu übersetzen.';
+        $sourceTextRu = 'Супер удивительная вещь для перевода.';
+
+        $clientMock->shouldReceive('translate')
+            ->with($sourceTextEn, ['source' => 'en', 'target' => 'de', 'format' => 'text', 'model' => ''])
+            ->once()
+            ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/test_translate_result_en_to_de.json')));
+
+        $clientMock->shouldReceive('translate')
+            ->with($sourceTextEn, ['source' => 'en', 'target' => 'ru', 'format' => 'text', 'model' => ''])
+            ->once()
+            ->andReturn(json_decode(file_get_contents(__DIR__ . '/mocks/test_translate_result_en_to_ru.json')));
+
+        $instance = new GoogleCloudTranslate($config);
+
+        // Need to inject mock to a private property
+        $reflection = new ReflectionClass($instance);
+        $reflectedClient = $reflection->getProperty('translateClient');
+        $reflectedClient->setAccessible(true);
+        $reflectedClient->setValue($instance, $clientMock);
+
+        $instance->setSourceLanguage('en');
+
+        $instance->setTargetLanguage('de');
+        $textDe = $instance->translate($sourceTextEn);
+
+        $instance->setTargetLanguage('ru');
+        $textRu = $instance->translate($sourceTextEn);
+
+        $this->assertEquals($textDe->text, $sourceTextDe);
+        $this->assertEquals($textRu->text, $sourceTextRu);
     }
 }

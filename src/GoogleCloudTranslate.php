@@ -264,15 +264,15 @@ class GoogleCloudTranslate
             throw new CustomException('Cannot translate to and from the same language.');
         }
 
-        $cacheKey = '__google_cloud_translate__translate_' .
-            md5($text) . '_';
-
         $options = [
           'source' => $this->config->source,
           'target' => $this->config->target,
           'format' => $this->config->format,
           'model' => (string) $this->config->model,
         ];
+
+        $cacheKey = '__google_cloud_translate__translate_' .
+            md5(serialize([$text, $options])) . '_';
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
             $result = $this->translateClient->translate($text, $options);
@@ -294,9 +294,6 @@ class GoogleCloudTranslate
             $this->checkCheapskate($text);
         }
 
-        $cacheKey = '__google_cloud_translate__translate_batch_' .
-            md5(json_encode($texts)) . '_';
-
         $options = [
           'source' => $this->config->source,
           'target' => $this->config->target,
@@ -304,6 +301,9 @@ class GoogleCloudTranslate
           // Default model is null for batch, '' for single
           'model' => ($this->config->model !== '') ? $this->config->model : null,
         ];
+
+        $cacheKey = '__google_cloud_translate__translate_batch_' .
+            md5(serialize([$texts, $options])) . '_';
 
         if (!$result = unserialize($this->cache->get($cacheKey))) {
             $result = $this->translateClient->translateBatch($texts, $options);
