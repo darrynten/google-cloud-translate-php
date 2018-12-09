@@ -215,7 +215,7 @@ class GoogleCloudTranslate
      *
      * @return mixed
      */
-    public function detectLanguage($sample)
+    public function detectLanguage(string $sample)
     {
         $cacheKey = '__google_cloud_translate__detect_language_' .
             md5($sample) . '_type_' . $this->config->format;
@@ -256,7 +256,7 @@ class GoogleCloudTranslate
      *
      * @return mixed
      */
-    public function translate($text)
+    public function translate(string $text)
     {
         $this->checkCheapskate($text);
 
@@ -329,7 +329,7 @@ class GoogleCloudTranslate
      * @throws CustomException
      * @return void
      */
-    private function checkCheapskate($text)
+    private function checkCheapskate(string $text)
     {
         if ($this->config->cheapskate === false) {
             return;
@@ -352,7 +352,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setFormat($format)
+    public function setFormat(string $format)
     {
         if (Validation::isValidFormat($format)) {
             $this->config->format = $format;
@@ -368,7 +368,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setModel($model)
+    public function setModel(string $model)
     {
         if (Validation::isValidModel($model)) {
             $this->config->model = $model;
@@ -384,7 +384,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setSourceLanguage($sourceLanguage)
+    public function setSourceLanguage(string $sourceLanguage)
     {
         if (Validation::isValidLanguageRegex($sourceLanguage)) {
             $this->config->source = $sourceLanguage;
@@ -401,7 +401,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setTargetLanguage($targetLanguage)
+    public function setTargetLanguage(string $targetLanguage)
     {
         if (Validation::isValidLanguageRegex($targetLanguage)) {
             $this->config->target = $targetLanguage;
@@ -417,7 +417,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setCheapskate($value)
+    public function setCheapskate(bool $value)
     {
         $this->config->cheapskate = $value;
     }
@@ -429,7 +429,7 @@ class GoogleCloudTranslate
      *
      * @return void
      */
-    public function setCheapskateCount($value)
+    public function setCheapskateCount(int $value)
     {
         $this->config->cheapskateCount = $value;
     }
