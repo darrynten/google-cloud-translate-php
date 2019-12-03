@@ -4,7 +4,7 @@
   "type": "library",
   "require": {
     "php": "^7.0",
-    "google/cloud": "^0.20.2",
+    "google/cloud": "0.*.*",
     "darrynten/any-cache": "^1.0"
   },
   "require-dev": {
